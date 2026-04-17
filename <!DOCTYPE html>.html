@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GANETOWN SELECT | Official</title>
+    <style>
+        :root { --accent: #e63946; --main: #333; --light: #f8f9fa; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--light); color: var(--main); }
+
+        .sale-banner { background: var(--accent); color: white; text-align: center; padding: 12px; font-weight: bold; position: sticky; top: 0; z-index: 1000; font-size: 0.85rem; }
+        header { background: white; padding: 10px 15px; border-bottom: 1px solid #eee; }
+        
+        .search-container { margin: 10px 0; position: relative; }
+        .search-input { width: 100%; padding: 10px 40px 10px 15px; border: 1px solid #ddd; border-radius: 20px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
+        .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+
+        .slideshow-container { position: relative; width: 100%; height: 320px; overflow: hidden; background: #222; }
+        .mySlides { display: none; width: 100%; height: 100%; background-size: cover; background-position: center; position: absolute; animation: fadeEffect 1.5s; }
+        .mySlides::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); }
+        @keyframes fadeEffect { from { opacity: 0.4; } to { opacity: 1; } }
+        .slide-text { position: absolute; bottom: 50px; left: 20px; color: white; z-index: 10; }
+
+        .container { padding: 20px 10px; }
+        .section-title { font-size: 1rem; margin-bottom: 15px; border-left: 4px solid var(--main); padding-left: 10px; }
+
+        /* 🔥 5列グリッド：横に5個並んだら自動で下の段へ */
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 10px; 
+        }
+
+        .card { background: white; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        .card-img { width: 100%; aspect-ratio: 1 / 1; background-size: cover; background-position: center; transition: 0.3s; }
+        .card:hover .card-img { transform: scale(1.05); }
+        .card-body { padding: 8px 4px; text-align: center; }
+        .card-title { font-size: 0.65rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-price { font-size: 0.7rem; font-weight: bold; color: var(--accent); margin: 4px 0; }
+        .btn-compact { background: var(--main); color: white; border: none; padding: 6px 0; width: 95%; margin: 0 auto; border-radius: 3px; font-size: 0.6rem; font-weight: bold; cursor: pointer; }
+
+        .sold-out-badge { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); color: white; display: none; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; z-index: 5; }
+
+        .news-list { background: white; border-radius: 8px; padding: 10px 15px; list-style: none; margin: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .news-item { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 0.8rem; display: flex; gap: 15px; }
+
+        #back-to-top { display: none; position: fixed; bottom: 25px; right: 20px; width: 50px; height: 50px; background: var(--main); color: white; border-radius: 50%; text-align: center; line-height: 50px; cursor: pointer; z-index: 1500; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 30px 20px; box-sizing: border-box; animation: slideUp 0.3s ease-out; position: relative; max-height: 90vh; overflow-y: auto; }
+        .size-selector { display: flex; gap: 10px; margin: 15px 0; }
+        .size-btn { border: 1px solid #ddd; padding: 10px; border-radius: 5px; flex: 1; text-align: center; cursor: pointer; font-size: 0.9rem; }
+        .size-btn.selected { border-color: var(--accent); color: var(--accent); background: #fff1f0; font-weight: bold; }
+        .size-btn.disabled { opacity: 0.2; cursor: not-allowed; text-decoration: line-through; }
+
+        /* お知らせセクションのスタイル */
+.news-list { 
+    background: white; 
+    border-radius: 8px; 
+    padding: 10px 15px; 
+    list-style: none; 
+    margin: 0; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+}
+.news-item { 
+    padding: 12px 0; 
+    border-bottom: 1px solid #eee; 
+    font-size: 0.8rem; 
+    display: flex; 
+    gap: 15px; 
+    align-items: flex-start;
+}
+.news-item:last-child { border-bottom: none; }
+.news-date { 
+    color: #999; 
+    font-weight: bold; 
+    min-width: 80px; 
+}
+.news-text { 
+    color: #555; 
+    line-height: 1.4;
+}
+    </style>
+</head>
+<body>
+
+    <div class="sale-banner">24時間限定セール終了まで <span id="timer">--:--:--</span></div>
+
+    <header>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-weight: 900; letter-spacing: 1px;">GANETOWN SELECT</div>
+            <div onclick="openCart()" style="cursor:pointer; position: relative; padding: 5px;">
+                🛒 <span id="cart-count" style="background:var(--accent); color:white; border-radius:50%; padding:2px 6px; font-size:0.7rem; position:absolute; top:-5px; right:-5px;">0</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="キーワードから探す">
+            <span class="search-icon">🔍</span>
+        </div>
+    </header>
+
+    <div class="slideshow-container">
+        <div class="mySlides" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800');"></div>
+        <div class="mySlides" style="background-image: url('https://images.unsplash.com/photo-1475180098004-ca77a66827be?w=800');"></div>
+        <div class="mySlides" style="background-image: url('https://images.unsplash.com/photo-1539109132313-3fb3a40e858c?w=800');"></div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">SALE ITEMS (50% OFF)</h2>
+        <div class="product-grid" id="sale-items"></div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">REGULAR ITEMS</h2>
+        <div class="product-grid" id="regular-items"></div>
+    </div>
+
+    <div id="back-to-top" onclick="scrollToTop()">▲</div>
+
+    <div id="detail-modal" class="modal" onclick="closeAll()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeAll()" style="position:absolute; right:20px; top:10px; font-size:1.5rem; cursor:pointer;">&times;</span>
+            <h2 id="modal-name"></h2>
+            <p id="modal-desc" style="color:#666; font-size:0.9rem; line-height:1.6;"></p>
+            <div style="font-size:0.8rem; margin-top:15px; font-weight:bold;">サイズを選択（在庫数）</div>
+            <div class="size-selector" id="size-selector"></div>
+            <button id="add-btn" class="btn-compact" onclick="addToCart()" style="background:var(--accent); padding:15px; font-size:1rem; width:100%; margin-top:10px;">買い物かごに入れる</button>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal" onclick="closeAll()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="margin-top:0;">買い物かご</h2>
+            <div id="cart-list"></div>
+            <div style="text-align:right; margin-top:15px; border-top:2px solid #eee; padding-top:15px;">
+                <p style="font-weight:bold; font-size:1.3rem;">合計金額: <span id="grand-total">¥0</span></p>
+                <button class="btn-compact" onclick="processCheckout()" style="background:var(--accent); padding:18px; font-size:1.1rem; width:100%;">注文を確定する</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">NEWS</h2>
+        <ul class="news-list">
+            <li class="news-item">
+                <span class="news-date">2026.04.17</span>
+                <span class="news-text">24時間限定！全品送料無料キャンペーン開催中。</span>
+            </li>
+            <li class="news-item">
+                <span class="news-date">2026.04.15</span>
+                <span class="news-text">新作「アーバンセットアップ」第2弾が入荷しました。</span>
+            </li>
+            <li class="news-item">
+                <span class="news-date">2026.04.10</span>
+                <span class="news-text">サーバーメンテナンスのお知らせ（4/20 02:00〜）</span>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        // 🔥 商品データ配列（全15点）
+        const products = [
+            // SALE品 (5個)
+            { id: 1, type: 'sale', name: "リラックスTシャツ", price: 4900, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400", desc: "肌触りの良いオーガニックコットンを使用。", stock: {S: 2, M: 5, L: 0} },
+            { id: 2, type: 'sale', name: "スリムデニム", price: 6800, img: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400", desc: "ストレッチ素材で動きやすい定番デニム。", stock: {S: 0, M: 2, L: 1} },
+            { id: 3, type: 'sale', name: "リネンシャツ", price: 5500, img: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400", desc: "清涼感のあるフレンチリネン100%。", stock: {S: 3, M: 3, L: 3} },
+            { id: 4, type: 'sale', name: "ロゴキャップ", price: 2900, img: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400", desc: "コーディネートのアクセントに最適。", stock: {S: 10, M: 10, L: 10} },
+            { id: 5, type: 'sale', name: "ナイロンショーツ", price: 3800, img: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400", desc: "撥水加工を施した夏にぴったりの短パン。", stock: {S: 1, M: 0, L: 0} },
+
+            // 通常商品 (10個)
+            { id: 6, type: 'reg', name: "Urban Jacket", price: 24000, img: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400", desc: "洗練された都会的なシルエット。", stock: {S: 5, M: 5, L: 5} },
+            { id: 7, type: 'reg', name: "Knit Sweater", price: 15000, img: "https://images.unsplash.com/photo-1614676471928-2ed0ad1061a4?w=400", desc: "カシミヤ混の柔らかな肌触り。", stock: {S: 2, M: 8, L: 4} },
+            { id: 8, type: 'reg', name: "Chino Pants", price: 12000, img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400", desc: "オンオフ使える万能チノ。", stock: {S: 4, M: 4, L: 4} },
+            { id: 9, type: 'reg', name: "Oxford Shirt", price: 9800, img: "https://images.unsplash.com/photo-1598033129183-c4f50c7176c8?w=400", desc: "厚手の生地で長く愛用できる一枚。", stock: {S: 10, M: 10, L: 10} },
+            { id: 10, type: 'reg', name: "Leather Shoes", price: 32000, img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400", desc: "職人によるハンドメイドの革靴。", stock: {S: 1, M: 1, L: 1} },
+            { id: 11, type: 'reg', name: "Wool Coat", price: 45000, img: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400", desc: "最高級ウールを使用した冬の主役。", stock: {S: 2, M: 2, L: 2} },
+            { id: 12, type: 'reg', name: "Silk Tie", price: 8500, img: "https://images.unsplash.com/photo-1589756823851-411590f7bf5f?w=400", desc: "上品な光沢のシルクネクタイ。", stock: {S: 20, M: 20, L: 20} },
+            { id: 13, type: 'reg', name: "Messenger Bag", price: 18000, img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400", desc: "PCも収納可能な大容量バッグ。", stock: {S: 5, M: 5, L: 5} },
+            { id: 14, type: 'reg', name: "Denim Jacket", price: 21000, img: "https://images.unsplash.com/photo-1523205771623-e0faa4d2813d?w=400", desc: "ヴィンテージ加工のGジャン。", stock: {S: 3, M: 3, L: 3} },
+            { id: 15, type: 'reg', name: "Cargo Pants", price: 14000, img: "https://images.unsplash.com/photo-1565084888279-aff9d22c725f?w=400", desc: "収納力抜群のカーゴパンツ。", stock: {S: 4, M: 4, L: 4} }
+        ];
+
+        function renderProducts() {
+            const saleArea = document.getElementById('sale-items');
+            const regArea = document.getElementById('regular-items');
+            saleArea.innerHTML = ""; regArea.innerHTML = "";
+
+            products.forEach(p => {
+                const totalStock = p.stock.S + p.stock.M + p.stock.L;
+                const html = `
+                    <div class="card">
+                        <div class="sold-out-badge" style="display: ${totalStock === 0 ? 'flex' : 'none'}">SOLD OUT</div>
+                        <div class="card-img" style="background-image:url('${p.img}')"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">${p.name}</h3>
+                            <p class="card-price">¥${p.price.toLocaleString()}</p>
+                            <button class="btn-compact" onclick='openDetail(${p.id})'>商品を見る</button>
+                        </div>
+                    </div>`;
+                if(p.type === 'sale') saleArea.innerHTML += html;
+                else regArea.innerHTML += html;
+            });
+        }
+
+        // --- タイマー・詳細・在庫連動 (前回ロジック維持) ---
+        let currentItem = null, selectedSize = null, cart = [];
+
+        function openDetail(id) {
+            currentItem = products.find(p => p.id === id);
+            selectedSize = null;
+            document.getElementById('modal-name').innerText = currentItem.name;
+            document.getElementById('modal-desc').innerText = currentItem.desc;
+            
+            document.getElementById('size-selector').innerHTML = ['S','M','L'].map(size => {
+                const count = currentItem.stock[size];
+                return `<div class="size-btn ${count === 0 ? 'disabled' : ''}" onclick="selectSize('${size}', ${count})">${size}<br><small>(${count})</small></div>`;
+            }).join('');
+            
+            document.getElementById('detail-modal').style.display = 'flex';
+        }
+
+        function selectSize(size, count) {
+            if (count === 0) return;
+            selectedSize = size;
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('selected', b.innerText.includes(size)));
+        }
+
+        function addToCart() {
+            if(!selectedSize) return alert("サイズを選択してください");
+            cart.push({ ...currentItem, selectedSize });
+            document.getElementById('cart-count').innerText = cart.length;
+            closeAll(); openCart();
+        }
+
+        function openCart() {
+            let total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('cart-list').innerHTML = cart.map((i, idx) => `
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
+                    <span>${i.name} (${i.selectedSize})</span>
+                    <span>¥${i.price.toLocaleString()} <button onclick="removeItem(${idx})" style="color:red; border:none; background:none; cursor:pointer;">消す</button></span>
+                </div>`).join('');
+            document.getElementById('grand-total').innerText = `¥${total.toLocaleString()}`;
+            document.getElementById('cart-modal').style.display = 'flex';
+        }
+
+        function removeItem(idx) { cart.splice(idx, 1); document.getElementById('cart-count').innerText = cart.length; openCart(); }
+
+        function processCheckout() {
+            if(cart.length === 0) return;
+            cart.forEach(item => {
+                const p = products.find(prod => prod.id === item.id);
+                if(p.stock[item.selectedSize] > 0) p.stock[item.selectedSize] -= 1;
+            });
+            alert("ご注文完了しました！");
+            cart = []; document.getElementById('cart-count').innerText = "0";
+            closeAll(); renderProducts();
+        }
+
+        function closeAll() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        window.onscroll = function() { document.getElementById("back-to-top").style.display = (window.pageYOffset > 400) ? "block" : "none"; };
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // 初期化
+        renderProducts();
+        // スライドショー & タイマー開始
+        let slideIndex = 0;
+        function showSlides() { let s = document.getElementsByClassName("mySlides"); for(let i=0; i<s.length; i++) s[i].style.display="none"; slideIndex++; if(slideIndex > s.length) slideIndex=1; s[slideIndex-1].style.display="block"; setTimeout(showSlides, 4000); }
+        showSlides();
+        
+        const SALE_DURATION = 86400000;
+        let endTime = localStorage.getItem('saleEndTime') || (Date.now() + SALE_DURATION);
+        localStorage.setItem('saleEndTime', endTime);
+        setInterval(() => {
+            const diff = endTime - Date.now();
+            if(diff <= 0) { document.getElementById('timer').innerText = "終了"; return; }
+            const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+            document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>
